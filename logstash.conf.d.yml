@@ -1,0 +1,32 @@
+```
+root@elk:/etc/logstash/conf.d# cat apache-01.conf
+# BEGIN ANSIBLE MANAGED BLOCK
+input {
+  beats {
+	port => 5044
+  }
+  file {
+    path => "/home/ubuntu/apache-daily-access.log"
+    start_position => "beginning"
+            sincedb_path => "/dev/null"
+  }
+}
+
+filter {
+  grok {
+      match => { "message" => "%{COMBINEDAPACHELOG}" }
+  }
+  date {
+    match => [ "timestamp" , "dd/MMM/yyyy:HH:mm:ss Z" ]
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["localhost:9200"]
+    index => "filebeat-%{+YYYY.MM.dd}"
+  }
+}
+
+# END ANSIBLE MANAGED BLOCK
+```
